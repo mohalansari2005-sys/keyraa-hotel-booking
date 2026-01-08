@@ -1,0 +1,22 @@
+[
+  {
+    "success": true,
+    "recipient": "moh.alansari2005@gmail.com",
+    "subject": "Hotel Booking Confirmed - Mock Hotel PAR 1",
+    "message_id": "791d0e51-27b4-4070-b959-9fc4e433502e",
+    "timestamp": "2026-01-07T17:11:32.910281",
+    "booking_reference": "REF000001"
+  },
+  {
+    "success": false,
+    "recipient": "m.alansari@majaracapital.com",
+    "error": "You can only send testing emails to your own email address (moh.alansari2005@gmail.com). To send emails to other recipients, please verify a domain at resend.com/domains, and change the `from` address to an email using this domain.",
+    "timestamp": "2026-01-07T17:11:33.379914"
+  },
+  {
+    "success": false,
+    "recipient": "john.doe@example.com",
+    "error": "You can only send testing emails to your own email address (moh.alansari2005@gmail.com). To send emails to other recipients, please verify a domain at resend.com/domains, and change the `from` address to an email using this domain.",
+    "timestamp": "2026-01-07T17:11:33.876771"
+  }
+]

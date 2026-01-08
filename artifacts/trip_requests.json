@@ -1,0 +1,25 @@
+{
+    "trip_requests": [
+        {
+            "employee_ref": "EMP001",
+            "city": "PAR",
+            "check_in": "2026-03-01",
+            "check_out": "2026-03-03",
+            "max_nightly_budget": "220.00"
+        },
+        {
+            "employee_ref": "EMP002",
+            "city": "LON",
+            "check_in": "2026-03-05",
+            "check_out": "2026-03-08",
+            "max_nightly_budget": "280.00"
+        },
+        {
+            "employee_ref": "EMP003",
+            "city": "PAR",
+            "check_in": "2026-03-02",
+            "check_out": "2026-03-06",
+            "max_nightly_budget": "200.00"
+        }
+    ]
+}

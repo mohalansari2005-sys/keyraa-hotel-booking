@@ -1,0 +1,19 @@
+{
+    "employees": [
+        {
+            "employee_ref": "EMP001",
+            "name": "Mohammed Alansari",
+            "email": "moh.alansari2005@gmail.com"
+        },
+        {
+            "employee_ref": "EMP002",
+            "name": "Majara Contact",
+            "email": "m.alansari@majaracapital.com"
+        },
+        {
+            "employee_ref": "EMP003",
+            "name": "John Doe",
+            "email": "john.doe@example.com"
+        }
+    ]
+}

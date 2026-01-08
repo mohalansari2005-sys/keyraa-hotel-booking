@@ -1,0 +1,113 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: keyraa-postgres
+    environment:
+      POSTGRES_USER: keyraa
+      POSTGRES_PASSWORD: keyraa
+      POSTGRES_DB: keyraa
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keyraa"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis for Celery broker
+  redis:
+    image: redis:7-alpine
+    container_name: keyraa-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Mailhog for local email testing
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: keyraa-mailhog
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    logging:
+      driver: none  # Suppress logs
+
+  # FastAPI Application
+  api:
+    build: .
+    container_name: keyraa-api
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://keyraa:keyraa@postgres:5432/keyraa
+      - DATABASE_URL_SYNC=postgresql://keyraa:keyraa@postgres:5432/keyraa
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - SMTP_HOST=mailhog
+      - SMTP_PORT=1025
+      - EMAIL_FROM=bookings@keyraa.local
+      - AMADEUS_CLIENT_ID=${AMADEUS_CLIENT_ID:-}
+      - AMADEUS_CLIENT_SECRET=${AMADEUS_CLIENT_SECRET:-}
+      - AMADEUS_BASE_URL=https://test.api.amadeus.com
+      - LOG_LEVEL=INFO
+      - DEBUG=true
+    volumes:
+      - .:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mailhog:
+        condition: service_started
+
+  # Celery Worker
+  worker:
+    build: .
+    container_name: keyraa-worker
+    command: celery -A app.workers.celery_app worker --loglevel=info --concurrency=4
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://keyraa:keyraa@postgres:5432/keyraa
+      - DATABASE_URL_SYNC=postgresql://keyraa:keyraa@postgres:5432/keyraa
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - SMTP_HOST=mailhog
+      - SMTP_PORT=1025
+      - EMAIL_FROM=bookings@keyraa.local
+      - AMADEUS_CLIENT_ID=${AMADEUS_CLIENT_ID:-}
+      - AMADEUS_CLIENT_SECRET=${AMADEUS_CLIENT_SECRET:-}
+      - AMADEUS_BASE_URL=https://test.api.amadeus.com
+      - LOG_LEVEL=INFO
+    volumes:
+      - .:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Database migrations (run once)
+  migrate:
+    build: .
+    container_name: keyraa-migrate
+    command: alembic upgrade head
+    environment:
+      - DATABASE_URL_SYNC=postgresql://keyraa:keyraa@postgres:5432/keyraa
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
